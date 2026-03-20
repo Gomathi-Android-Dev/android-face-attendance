@@ -83,6 +83,62 @@ fun AttendanceScreen(navController: NavController,
             }
         }
     }
+    /*
+    //group photo
+    val detector = remember {
+    val options = FaceDetectorOptions.Builder()
+        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+        .build()
+    FaceDetection.getClient(options)
+}
+
+LaunchedEffect(Unit) {
+    cameraViewModel.uiEffect.collect { effect ->
+        if (effect is CameraUIEffect.ShowCapturedImage) {
+            isCameraActive = false
+            capturedBitmap = effect.bitmap
+
+            val inputImage = InputImage.fromBitmap(effect.bitmap, 0)
+
+            // 1. Detect all faces in the group photo
+            detector.process(inputImage)
+                .addOnSuccessListener { faces ->
+                    // 2. Run matching in background
+                    userViewModel.viewModelScope.launch(Dispatchers.Default) {
+                        val matchedUsers = mutableListOf<User>()
+
+                        faces.forEach { face ->
+                            // 3. Crop each face from the main photo
+                            val faceBitmap = cropBitmapToFace(effect.bitmap, face.boundingBox)
+
+                            // 4. Compare this specific face against all users in DB
+                            users.forEach { user ->
+                                val storedBitmap = byteArrayToBitmap(user.image)
+                                if (storedBitmap != null) {
+                                    val similarity = compareBitmapsCosine(faceBitmap, storedBitmap)
+                                    if (similarity > 0.88f) { // Slightly lower threshold for cropped faces
+                                        matchedUsers.add(user)
+                                    }
+                                }
+                            }
+                        }
+
+                        // 5. Update Room for all matched users
+                        withContext(Dispatchers.Main) {
+                            matchedUsers.distinctBy { it.id }.forEach { user ->
+                                userViewModel.updateAttendance(user, true)
+                                Log.d("MATCH", "Multi-match found: ${user.name}")
+                            }
+                            // Optional: go back after processing everyone
+                            // navController.popBackStack()
+                        }
+                    }
+                }
+        }
+    }
+}*/
+
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
